@@ -1,0 +1,10 @@
+{
+  "name": "walletwise-root",
+  "version": "1.0.0",
+  "description": "Proxy package.json to help start the frontend from the root folder.",
+  "scripts": {
+    "dev": "cd wallet-wise && npm run dev",
+    "build": "cd wallet-wise && npm run build",
+    "install-frontend": "cd wallet-wise && npm install"
+  }
+}
