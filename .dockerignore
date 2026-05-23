@@ -1,0 +1,10 @@
+.git
+.gitignore
+.idea
+*.iml
+target/
+!target/*.jar
+node_modules/
+wallet-wise/
+logs/
+*.log
