@@ -58,8 +58,11 @@ public class EmailService {
                 log.info("Email sent successfully via EmailJS to {}", to);
             } else {
                 log.error("EmailJS returned an error: {}", response.getBody());
-                throw new RuntimeException("EmailJS failed to send email.");
+                throw new RuntimeException("EmailJS failed: " + response.getBody());
             }
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            log.error("EmailJS API Error. Status: {}, Body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("EmailJS Error: " + e.getResponseBodyAsString());
         } catch (Exception e) {
             log.error("Failed to connect to EmailJS API: {}", e.getMessage());
             throw new RuntimeException("Failed to send password recovery email via API.");
