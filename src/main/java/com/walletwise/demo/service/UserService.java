@@ -147,18 +147,7 @@ public class UserService {
 
         log.info("For local testing, the OTP for {} is: {}", email, otp);
         
-        String htmlContent = "<p>Hello " + (user.getName() != null ? user.getName() : "User") + ",</p>"
-                + "<p>Your OTP for resetting WalletWise password is: <strong>" + otp + "</strong></p>"
-                + "<p>This OTP is valid for 5 minutes.</p>"
-                + "<p>If you did not request this, please ignore this email.</p>"
-                + "<p>* Team WalletWise</p>";
-
-        try {
-            emailService.sendHtmlEmail(email, "WalletWise Password Reset OTP", htmlContent);
-        } catch (Exception e) {
-            log.warn("SMTP email blocked. Providing OTP in exception for demo purposes. OTP: {}", otp);
-            throw new RuntimeException("Server blocked email sending. Demo Mode OTP: " + otp);
-        }
+        emailService.sendOtpEmail(email, otp);
 
         if (user.getPhoneNumber() != null && !user.getPhoneNumber().trim().isEmpty()) {
             smsService.sendSms(user.getPhoneNumber(), "Your WalletWise password reset OTP is: " + otp + ". Valid for 5 minutes.");

@@ -1,46 +1,64 @@
 package com.walletwise.demo.service;
 
-import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @Value("${emailjs.service.id}")
+    private String serviceId;
 
-    @Value("${spring.mail.username}")
-    private String senderEmail;
+    @Value("${emailjs.template.id}")
+    private String templateId;
 
-    public void sendHtmlEmail(String to, String subject, String htmlContent) {
-        log.info("Email sending started to {}", to);
+    @Value("${emailjs.public.key}")
+    private String publicKey;
+
+    public void sendOtpEmail(String to, String otp) {
+        log.info("Attempting to send email via EmailJS API to {}", to);
+        
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            try {
-                helper.setFrom(senderEmail, "WalletWise Support");
-            } catch (java.io.UnsupportedEncodingException ex) {
-                helper.setFrom(senderEmail);
+            String url = "https://api.emailjs.com/api/v1.0/email/send";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> templateParams = new HashMap<>();
+            templateParams.put("to_email", to);
+            templateParams.put("otp", otp);
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("service_id", serviceId);
+            requestBody.put("template_id", templateId);
+            requestBody.put("user_id", publicKey);
+            requestBody.put("template_params", templateParams);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Email sent successfully via EmailJS to {}", to);
+            } else {
+                log.error("EmailJS returned an error: {}", response.getBody());
+                throw new RuntimeException("EmailJS failed to send email.");
             }
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true);
-            mailSender.send(message);
-            log.info("Email sent successfully to {}", to);
-        } catch (org.springframework.mail.MailAuthenticationException e) {
-            log.error("Authentication failed for email {}: Invalid App Password. {}", senderEmail, e.getMessage());
-            throw new RuntimeException("Failed to send password recovery email: Authentication failed. Please check your App Password.");
         } catch (Exception e) {
-            log.error("Email sending failed to {}: {}", to, e.getMessage());
-            throw new RuntimeException("Failed to send password recovery email: " + e.getMessage());
+            log.error("Failed to connect to EmailJS API: {}", e.getMessage());
+            throw new RuntimeException("Failed to send password recovery email via API.");
         }
     }
 }
