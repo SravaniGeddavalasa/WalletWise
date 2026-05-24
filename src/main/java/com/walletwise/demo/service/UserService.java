@@ -153,7 +153,12 @@ public class UserService {
                 + "<p>If you did not request this, please ignore this email.</p>"
                 + "<p>* Team WalletWise</p>";
 
-        emailService.sendHtmlEmail(email, "WalletWise Password Reset OTP", htmlContent);
+        try {
+            emailService.sendHtmlEmail(email, "WalletWise Password Reset OTP", htmlContent);
+        } catch (Exception e) {
+            log.warn("SMTP email blocked. Providing OTP in exception for demo purposes. OTP: {}", otp);
+            throw new RuntimeException("Server blocked email sending. Demo Mode OTP: " + otp);
+        }
 
         if (user.getPhoneNumber() != null && !user.getPhoneNumber().trim().isEmpty()) {
             smsService.sendSms(user.getPhoneNumber(), "Your WalletWise password reset OTP is: " + otp + ". Valid for 5 minutes.");
