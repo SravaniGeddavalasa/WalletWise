@@ -65,7 +65,7 @@ public class EmailService {
             throw new RuntimeException("EmailJS Error: " + e.getResponseBodyAsString());
         } catch (Exception e) {
             log.error("Failed to connect to EmailJS API: {}", e.getMessage());
-            throw new RuntimeException("Failed to send password recovery email via API.");
+            throw new RuntimeException("API Connection Error (" + e.getClass().getSimpleName() + "): " + e.getMessage());
         }
     }
 }
