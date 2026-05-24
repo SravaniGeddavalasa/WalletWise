@@ -67,6 +67,12 @@ axiosInstance.interceptors.response.use(
     if (error.response.status === 401 && !originalRequest._retry) {
       if (originalRequest.url?.includes("/auth/login") || originalRequest.url?.includes("/auth/refresh")) {
         // Don't retry auth paths to prevent infinite loops
+        if (error.response && error.response.data && typeof error.response.data === "object") {
+          const backendMessage = (error.response.data as any).message;
+          if (backendMessage) {
+            return Promise.reject(new Error(backendMessage));
+          }
+        }
         return Promise.reject(error);
       }
 
