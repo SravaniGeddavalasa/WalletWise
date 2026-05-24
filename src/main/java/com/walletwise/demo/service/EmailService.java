@@ -28,6 +28,9 @@ public class EmailService {
     @Value("${emailjs.public.key}")
     private String publicKey;
 
+    @Value("${emailjs.private.key}")
+    private String privateKey;
+
     public void sendOtpEmail(String to, String otp) {
         log.info("Attempting to send email via EmailJS API to {}", to);
         
@@ -45,6 +48,7 @@ public class EmailService {
             requestBody.put("service_id", serviceId);
             requestBody.put("template_id", templateId);
             requestBody.put("user_id", publicKey);
+            requestBody.put("accessToken", privateKey);
             requestBody.put("template_params", templateParams);
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
