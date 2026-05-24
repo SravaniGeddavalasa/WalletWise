@@ -29,7 +29,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/auth/**", "/api/income/**", "/api/expenses/**", "/api/budgets/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/income/**", "/api/expenses/**", "/api/budgets/**", "/api/dashboard/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
